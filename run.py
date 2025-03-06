@@ -25,11 +25,14 @@ SHEET = GSPREAD_CLIENT.open('love_sandwiches')
 
 
 # Define a function to collect sales data from the user
+print('testing')
 def get_sales_data():
     """
     This function asks the user to input sales figures from the last market.
     It ensures the data is formatted correctly before proceeding.
     """
+while True: # Create an infinite loop that will keep asking for data until
+    # the correct format is provided
     print("Please enter sales data from the last market")  # Display instructions to the user
     print("Data should be six numbers, separated by commas")  # Explain input format
     print("Example: 10,20,30,40,50,60\n")  # Provide an example input format
@@ -46,6 +49,11 @@ def get_sales_data():
     # Call the validate_data function to check if the input is valid
     validate_data(sales_data)
 
+    if validate_data(sales_data): # If the data is valid
+        print("Data is valid!")
+        break # Exit the loop
+    # If the data is invalid, the loop will continue to the next iteration
+    # and prompt the user to enter the data again
 
 # Define a function to validate the user input
 def validate_data(values):
@@ -56,6 +64,7 @@ def validate_data(values):
     If the input is invalid, the function prompts the user to re-enter the data.
     """
     try:
+        [int(value) for value in values]  # Check if all values are integers
         # Check if the number of values in the list is exactly 6
         if len(values) != 6:
             raise ValueError(  # Raise an error if the number of values is incorrect
@@ -66,8 +75,14 @@ def validate_data(values):
         int_values = [int(value) for value in values]  # This will raise an error if a value is not a number
     
     except ValueError as e:  # If an error occurs (e.g., incorrect input format)
-        print(f"Invalid data: {e}, please try again.\n")  # Show error message
-        get_sales_data()  # Ask the user to enter the data again
+         print(f"Invalid data: {e}, please try again.\n")  # Show error message
+    return False  # Return False if the data is invalid
+
+return True  # Return True if the data is valid
+
+get_sales_data()
+
+
 
 # Next steps (to be implemented):
 # 1. Add the sales data to the 'sales' worksheet in the Google Sheet.
