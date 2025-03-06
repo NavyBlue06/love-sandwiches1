@@ -24,69 +24,67 @@ GSPREAD_CLIENT = gspread.authorize(SCOPE_CREDS)
 SHEET = GSPREAD_CLIENT.open('love_sandwiches')
 
 
-# Define a function to collect sales data from the user
-print('testing')
 def get_sales_data():
     """
-    This function asks the user to input sales figures from the last market.
-    It ensures the data is formatted correctly before proceeding.
+    Asks the user to input sales figures from the last market.
+    Ensures the data is correctly formatted before proceeding.
     """
-while True: # Create an infinite loop that will keep asking for data until
-    # the correct format is provided
-    print("Please enter sales data from the last market")  # Display instructions to the user
-    print("Data should be six numbers, separated by commas")  # Explain input format
-    print("Example: 10,20,30,40,50,60\n")  # Provide an example input format
+    while True:  # Keep asking for input until valid data is provided
+        print("Please enter sales data from the last market")
+        print("Data should be six numbers, separated by commas")
+        print("Example: 10,20,30,40,50,60\n")
 
-    # Take user input as a string (text)
-    data_str = input("Enter your data here: ")
+        # Take user input and strip extra spaces
+        data_str = input("Enter your data here: ").strip()
 
-    # Print back what the user entered to confirm their input
-    print(f"The data provided is {data_str}")
+        # Confirm the entered data
+        print(f"The data provided is {data_str}")
 
-    # Convert the input string into a list by splitting at each comma
-    sales_data = data_str.split(",")
+        # Convert input string into a list
+        sales_data = data_str.split(",")
 
-    # Call the validate_data function to check if the input is valid
-    validate_data(sales_data)
+        # Validate the data
+        if validate_data(sales_data):
+            print("Data is valid!")
+            return sales_data  # Return valid data to be stored in Google Sheets
 
-    if validate_data(sales_data): # If the data is valid
-        print("Data is valid!")
-        break # Exit the loop
-    # If the data is invalid, the loop will continue to the next iteration
-    # and prompt the user to enter the data again
 
-# Define a function to validate the user input
 def validate_data(values):
     """
-    This function checks if the input data meets the required format:
-    - It should contain exactly 6 values.
-    - All values should be integers.
-    If the input is invalid, the function prompts the user to re-enter the data.
+    Validates user input:
+    - Ensures exactly 6 values are provided.
+    - Checks that all values are integers.
+    Returns True if valid, otherwise prompts user again.
     """
     try:
-        [int(value) for value in values]  # Check if all values are integers
-        # Check if the number of values in the list is exactly 6
+        # Check if there are exactly 6 values
         if len(values) != 6:
-            raise ValueError(  # Raise an error if the number of values is incorrect
-                f"Exactly 6 values required, you provided {len(values)}"
-            )
+            raise ValueError(f"Exactly 6 values required, you provided {len(values)}")
 
-        # Convert all values from strings to integers
-        int_values = [int(value) for value in values]  # This will raise an error if a value is not a number
-    
-    except ValueError as e:  # If an error occurs (e.g., incorrect input format)
-         print(f"Invalid data: {e}, please try again.\n")  # Show error message
-    return False  # Return False if the data is invalid
+        # Convert values from strings to integers
+        int_values = [int(value) for value in values]  # Will raise error if non-numeric
 
-return True  # Return True if the data is valid
+    except ValueError as e:
+        print(f"Invalid data: {e}, please try again.\n")
+        return False  # If invalid, return False to re-prompt user
 
-get_sales_data()
+    return True  # Data is valid
 
 
+def update_sales_worksheet(data):
+    """
+    Updates the 'sales' worksheet in Google Sheets.
+    Appends a new row with the latest sales data.
+    """
+    print("Updating sales worksheet...\n")
+    sales_worksheet = SHEET.worksheet("sales")  # Open 'sales' worksheet
+    sales_worksheet.append_row([int(num) for num in data])  # Convert data to integers before appending
+    print("Sales worksheet updated successfully!\n")
 
-# Next steps (to be implemented):
-# 1. Add the sales data to the 'sales' worksheet in the Google Sheet.
-# 2. Calculate surplus data (difference between stock and sales).
-# 3. Add surplus data to the 'surplus' worksheet.
-# 4. Calculate the average sales for the last 5 markets.
-# 5. Add calculated stock numbers to the 'stock' worksheet.
+
+# Ensure script runs only when executed directly
+if __name__ == "__main__":
+    print("DEBUG: Script has started running!")  # Debugging message
+    sales_data = get_sales_data()  # Get user input
+    update_sales_worksheet(sales_data)  # Store the data in Google Sheets
+    print(f"Final validated sales data: {sales_data}")
